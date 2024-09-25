@@ -1,0 +1,157 @@
+﻿@{
+    ViewData["Title"] = "Instruções";
+}
+
+<h2>Instruções</h2>
+
+<p>
+    Nesta atividade, você deverá ler em voz alta as palavras que aparecerem na tela, da maneira mais rápida e precisa possível.
+    Primeiro, faremos um treino para você se acostumar com a tarefa. Qualquer dúvida, não hesite em falar com a pesquisadora responsável.
+</p>
+
+<p>
+    Vamos começar o treino. Você deverá ler em voz alta as palavras em mandarim que aparecerem na tela, o mais rápido que conseguir.
+</p>
+
+<button id="btnIniciarTreino" class="btn btn-primary">Começar treino</button>
+
+<div id="areaTreino" style="display:none;">
+    <h3 id="textoTreino">Preparado? O treino começará em breve!</h3>
+
+    <p id="temporizador"></p>
+</div>
+
+<script>
+    document.getElementById('btnIniciarTreino').addEventListener('click', function () {
+        document.getElementById('btnIniciarTreino').style.display = 'none';
+        document.getElementById('areaTreino').style.display = 'block';
+
+        iniciarTreino();
+    });
+
+    window.onload = function () {
+        pedirPermissaoMicrofone();
+    };
+
+    function pedirPermissaoMicrofone() {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function (stream) {
+                console.log("Permissão concedida para usar o microfone.");
+
+            })
+            .catch(function (err) {
+                console.error("Permissão para usar o microfone foi negada: ", err);
+                alert("Para realizar o experimento, é necessário permitir o uso do microfone.");
+            });
+    }
+
+    function iniciarTreino() {
+        let textosTreino = [
+            '点心', 
+            '桌子',
+            '书本'
+        ];
+
+        let currentIndex = 0;
+        exibirTexto(textosTreino[currentIndex]);
+
+        function exibirTexto(texto) {
+            setTimeout(() => {
+                document.getElementById('textoTreino').innerText = '+';
+            }, 500);
+
+            setTimeout(() => {
+                document.getElementById('textoTreino').innerText = '#######';
+            }, 1000);
+
+            setTimeout(() => {
+                document.getElementById('textoTreino').innerText = 'Prime Exemplo';
+            }, 1500);
+
+            setTimeout(() => {
+                document.getElementById('textoTreino').innerText = texto;
+
+                iniciarGravacao();
+
+            }, 1550);
+
+            setTimeout(() => {
+                currentIndex++;
+                if (currentIndex < textosTreino.length) {
+                    exibirTexto(textosTreino[currentIndex]);
+                } else {
+                    finalizarTreino();
+                }
+            }, 4550);
+        }
+    }
+
+    let mediaRecorder;
+    let audioChunks = [];
+
+    function iniciarGravacao() {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function (stream) {
+                mediaRecorder = new MediaRecorder(stream);
+
+                console.log("Gravando áudio do participante...");
+
+                mediaRecorder.start();
+
+                mediaRecorder.addEventListener("dataavailable", function (event) {
+                    audioChunks.push(event.data);
+                });
+
+                setTimeout(function () {
+                    pararGravacao();
+                }, 3000); 
+
+            })
+            .catch(function (err) {
+                console.error("Erro ao acessar o microfone: " + err);
+            });
+    }
+
+    function pararGravacao() {
+        mediaRecorder.stop();
+        console.log("Gravação finalizada.");
+
+        mediaRecorder.addEventListener("stop", function () {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            audioChunks = []; 
+
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+
+            salvarAudio(audioBlob);
+        });
+    }
+    function salvarAudio(audioBlob) {
+
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'gravacao.wav');
+
+        fetch('/salvar-audio', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                console.log('Áudio enviado com sucesso.');
+            } else {
+                console.log('Erro ao enviar o áudio.');
+            }
+        }).catch(error => {
+            console.log('Erro: ', error);
+        });
+    }
+
+    function finalizarTreino() {
+        document.getElementById('textoTreino').innerText = 'Treino finalizado! Agora, aperte espaço para começar o experimento real.';
+
+        document.addEventListener('keydown', function (event) {
+            if (event.code === 'Space') {
+                window.location.href = '@Url.Action("Experimento", "Experimento")'; 
+            }
+        });
+    }
+</script>

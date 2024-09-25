@@ -1,0 +1,12 @@
+﻿<div>
+    <h1>Seja Bem-vindo(a)!</h1>
+    <p>Este é um estudo sobre leitura de palavras. Aperte a barra de espaço para avançar.</p>
+</div>
+
+<script>
+    document.addEventListener('keydown', function(event) {
+        if (event.code === 'Space') {
+            window.location.href = '@Url.Action("Consentimento", "Experimento")';
+        }
+    });
+</script>
