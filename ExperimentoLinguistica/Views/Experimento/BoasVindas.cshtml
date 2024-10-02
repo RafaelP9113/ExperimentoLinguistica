@@ -1,12 +1,17 @@
 ﻿<div>
     <h1>Seja Bem-vindo(a)!</h1>
-    <p>Este é um estudo sobre leitura de palavras. Aperte a barra de espaço para avançar.</p>
+    <br />
+    <p>Este é um estudo sobre leitura de palavras. Escolha um idioma para avançar:</p>
+    <button class="btn-contrast" id="btnMandarim">Mandarim</button>
+    <button class="btn-contrast" id="btnJapones">Japonês</button>
 </div>
 
 <script>
-    document.addEventListener('keydown', function(event) {
-        if (event.code === 'Space') {
-            window.location.href = '@Url.Action("Consentimento", "Experimento")';
-        }
+    document.getElementById('btnMandarim').addEventListener('click', function () {
+        window.location.href = '@Url.Action("Consentimento", "Experimento", new { idioma = "Mandarim" })';
+    });
+
+    document.getElementById('btnJapones').addEventListener('click', function () {
+        window.location.href = '@Url.Action("Consentimento", "Experimento", new { idioma = "Japones" })';
     });
 </script>

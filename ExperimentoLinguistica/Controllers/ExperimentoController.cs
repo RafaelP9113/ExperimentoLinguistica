@@ -15,8 +15,9 @@ namespace ExperimentoLinguistica.Controllers
             return View();
         }
 
-        public IActionResult Consentimento()
+        public IActionResult Consentimento(string idioma)
         {
+            ViewBag.IdiomaSelecionado = idioma;
             return View(new Consentimento());
         }
 

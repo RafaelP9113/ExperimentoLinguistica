@@ -1,8 +1,19 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
+
+
+    const btnAceitarTermo = document.getElementById('aceitarTermo');
+    if (btnAceitarTermo) {
+        document.getElementById('aceitarTermo').addEventListener('change', function () {
+            var btnContinuar = document.getElementById('btnContinuar');
+            btnContinuar.disabled = !this.checked;
+        });
+    }
+
     const btnIniciarTreino = document.getElementById('btnIniciarTreino');
     if (btnIniciarTreino) {
         btnIniciarTreino.addEventListener('click', function () {
             btnIniciarTreino.style.display = 'none';
+            document.getElementById('instTreino').style.display = 'none';
             document.getElementById('areaTreino').style.display = 'block';
             const diretorio = "Treino";
             iniciarExperimento(diretorio);
@@ -165,6 +176,14 @@ function finalizarExperimento(diretorio) {
             } else {
                 window.location.href = window.urls.experimento;
             }
+        }
+    });
+
+    document.addEventListener('click', function () {
+        if (diretorio === 'Experimento') {
+            window.location.href = window.urls.boasVindas;
+        } else {
+            window.location.href = window.urls.experimento;
         }
     });
 }

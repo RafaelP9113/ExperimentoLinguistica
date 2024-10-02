@@ -1,5 +1,63 @@
-﻿<form method="post">
-    <p>Você aceita participar dessa pesquisa?</p>
-    <button type="submit" name="Aceito" value="true">Sim</button>
-    <button type="submit" name="Aceito" value="false">Não</button>
+﻿
+<form method="post">
+    <div>
+        <p>Você aceita participar dessa pesquisa?</p>
+
+        <br />
+
+        <a href="#" data-bs-toggle="modal" data-bs-target="#modalConsentimento">Leia o termo de consentimento</a>
+
+        <div class="modal fade" id="modalConsentimento" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalLabel">
+                            REGISTRO DE CONSENTIMENTO LIVRE E ESCLARECIDO
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        @if (ViewBag.IdiomaSelecionado == "Japones")
+                        {
+                            <p>Este é o termo de consentimento para participantes que escolheram o idioma Japonês.</p>
+                        }
+                        else
+                        {
+                            <p>Este é o termo de consentimento para participantes que escolheram o idioma Mandarim.</p>
+                        }
+
+                        <h4>Informações aos participantes</h4>
+
+                        <ol>
+                            <li><strong>Título do protocolo do estudo:</strong> Psicolinguística e leitura: acesso lexical bilíngue.</li>
+                            <li><strong>Convite:</strong> Você está sendo convidado(a) a participar da pesquisa Psicolinguística e leitura: acesso lexical bilíngue. Antes de decidir se participará, é importante que você entenda porque o estudo está sendo feito e o que ele envolverá. Reserve um tempo para ler cuidadosamente as informações a seguir e faça perguntas se algo não estiver claro ou se quiser mais informações.</li>
+                            <li><strong>O que é o projeto e qual seu objetivo?</strong> Este projeto busca investigar como as palavras são representadas e selecionadas na mente humana. Mais especificamente, nosso interesse é compreender uma questão relacionada a uma etapa específica da leitura (chamada de acesso lexical) em pessoas capazes de ler em línguas muito diferentes. Portanto, este estudo não tem o caráter de julgar o seu conhecimento, mas de entender como um estímulo escrito se relaciona com processos mentais ativados na mente humana quando uma pessoa bilíngue lê em voz alta.</li>
+                            <li><strong>Por que eu fui escolhido(a)?</strong> Você foi selecionado por conhecer as línguas investigadas neste estudo, português e japonês. A sua participação nos ajudará a expandir a compreensão sobre como a leitura acontece, o que pode auxiliar no aprimoramento dos métodos de ensino de idiomas e de leitura e escrita. Sua participação será voluntária e não haverá nenhum custo envolvido na execução das atividades.</li>
+                            <li><strong>Eu tenho que participar?</strong> Você é quem decide se gostaria de participar ou não deste estudo/pesquisa. Se decidir participar do projeto Psicolinguística e leitura: acesso lexical bilíngue você deverá concordar com este Registro e receberá uma via em seu e-mail, a qual você deverá guardar. Mesmo se você decidir participar, você ainda tem a liberdade de se retirar das atividades a qualquer momento, sem qualquer justificativa. Isso não afetará em nada sua participação em demais atividades e não causará nenhum prejuízo.</li>
+                            <li><strong>O que acontecerá comigo se eu participar? O que eu tenho que fazer?</strong> Depois de concordar com este termo, solicitaremos que você preencha um questionário com alguns dados pessoais e seus antecedentes linguísticos. Após, enviaremos o link de acesso ao experimento no qual você deverá autorizar a captura de voz. Na primeira tarefa, você deverá ler em voz alta as palavras que aparecerem na tela, o mais rápido possível. Terminada essa parte, você deverá avaliar a similaridade entre dois estímulos conforme a sua percepção. Estima-se que o preenchimento do questionário dure em torno de 15 minutos e o experimento linguístico tenha a duração de 15 minutos.</li>
+                            <li><strong>Quais são os eventuais riscos ao participar do estudo?</strong> De acordo com as Resolução 466 e 510 do Conselho Nacional de Saúde, todas as pesquisas envolvem riscos, ainda que mínimos. Este estudo apresenta poucos riscos e, dentre eles, pode-se pontuar: (a) a possibilidade de sentir-se envergonhado por não conseguir ler alguma(s) palavra(s) do experimento; (b) sentir desconforto postural ou ocular pela posição na cadeira e exposição à tela; (c) ameaças inerentes a qualquer acesso a internet e plataformas utilizadas, o que pode resultar na exposição dos dados e perda da confidencialidade. Para minimizar esses riscos pedimos que: (a) lembre-se que o objetivo não é medir a proficiência e nem emitir qualquer julgamento sobre o seu conhecimento; (b) sente-se de maneira confortável, em ambiente silencioso, e ajuste o brilho da tela e a sua posição antes da rodada de testes; e (c) seus dados serão anonimizados para que sua identidade seja preservada.</li>
+                            <li><strong>Quais são os possíveis benefícios de participar?</strong> A sua participação não garante que este estudo traga benefícios diretos para você e em nenhum caso você receberá qualquer vantagem financeira por fazer parte da pesquisa. Entretanto, o estudo tem o potencial de ampliar o entendimento sobre os processos mentais envolvidos no momento em que leitores reconhecem palavras, o que pode resultar em benefícios futuros para outros indivíduos que venham a estudar as línguas investigadas.</li>
+                            <li><strong>E se algo der errado?</strong> Você terá todas as informações que quiser sobre esta pesquisa e estará livre para participar ou recusar-se a participar. Mesmo que você queira participar agora, você pode voltar atrás ou parar de participar a qualquer momento sem nenhuma penalização ou prejuízo.</li>
+                            <li><strong>Minha participação neste estudo será mantida em sigilo?</strong> Será mantido o mais rigoroso sigilo mediante a omissão total de informações que permitam a identificação individual dos participantes em publicações que resultem desta pesquisa.</li>
+                            <li><strong>Contato para informações adicionais:</strong> Dados da pesquisadora responsável: Daniela Cid de Garcia, <a href="mailto:daniela@letras.ufrj.br">daniela@letras.ufrj.br</a>. Dados da equipe de pesquisa: Rachel Antonio Soares, <a href="mailto:rachelsoares@letras.ufrj.br">rachelsoares@letras.ufrj.br</a>; Natália Alves Teixeira, <a href="mailto:nataliateixeira@letras.ufrj.br">nataliateixeira@letras.ufrj.br</a>. Instituição Proponente: Faculdade de Letras da Universidade Federal do Rio de Janeiro (UFRJ). O Comitê de Ética em Pesquisa é um colegiado responsável pelo acompanhamento das ações deste projeto em relação a sua participação, a fim de proteger os direitos dos participantes desta pesquisa e prevenir eventuais riscos. Caso você tenha dificuldade em entrar em contato com a pesquisadora responsável, ou tenha qualquer queixa ou reclamação acerca de seus procedimentos e atitudes, comunique o fato à Comissão de Ética em Pesquisa do Instituto de Estudos em Saúde Coletiva pelo e-mail: <a href="mailto:cep@iesc.ufrj.br">cep@iesc.ufrj.br</a> ou no endereço Avenida Horácio de Macedo, S/N, CEP 21941-598 – Cidade Universitária, Rio de Janeiro/RJ. O Comitê de Ética em Pesquisa é um colegiado responsável pelo acompanhamento das ações de pesquisa a fim de proteger os direitos dos participantes e prevenir eventuais riscos.</li>
+                            <li><strong>Remunerações financeiras:</strong> Nenhum incentivo ou recompensa financeira está previsto pela sua participação nesta pesquisa.</li>
+                        </ol>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br />
+
+        <div class="check-label">
+            <input type="checkbox" id="aceitarTermo" />
+            <label for="aceitarTermo">Li e concordo com o termo de consentimento</label>
+        </div>
+
+        <br />
+
+        <button type="submit" id="btnContinuar" class="btn-contrast" name="Aceito" value="true" disabled>Continuar</button>
+        <button type="submit" class="btn-contrast-light" name="Aceito" value="false">Voltar</button>
+
+    </div>
 </form>
