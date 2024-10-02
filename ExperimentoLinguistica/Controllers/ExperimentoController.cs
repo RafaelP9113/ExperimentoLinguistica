@@ -154,6 +154,44 @@ namespace ExperimentoLinguistica.Controllers
 
             return $"P{proximoP}F{frase}{sufixo}.wav";
         }
+        private string GerarNomeArquivo(int frase, string diretorio)
+        {
+            if (!Directory.Exists(_audioDirectory))
+            {
+                Directory.CreateDirectory(_audioDirectory);
+            }
+
+            string sufixo = diretorio == "Treino" ? "T" : "E";
+
+            // Obter todos os arquivos com sufixo "T" e "E"
+            var arquivosExistentes = Directory.GetFiles(_audioDirectory, $"P*F{frase}*.wav");
+
+            int maiorP_T = 0; // Maior P para Treino
+            int maiorP_E = 0; // Maior P para Experimento
+
+            foreach (var arquivo in arquivosExistentes)
+            {
+                var nomeArquivo = Path.GetFileNameWithoutExtension(arquivo);
+                var partes = nomeArquivo.Split('P', 'F');
+
+                if (partes.Length >= 3 && int.TryParse(partes[1], out int numeroP) && partes[2].EndsWith(sufixo))
+                {
+                    if (partes[2].EndsWith("T") && numeroP > maiorP_T)
+                    {
+                        maiorP_T = numeroP;
+                    }
+                    else if (partes[2].EndsWith("E") && numeroP > maiorP_E)
+                    {
+                        maiorP_E = numeroP;
+                    }
+                }
+            }
+
+            // Determinar o próximo P para o sufixo correto
+            int proximoP = sufixo == "T" ? maiorP_T + 1 : maiorP_E + 1;
+
+            return $"P{proximoP}F{frase}{sufixo}.wav";
+        }
     }
 
 }
