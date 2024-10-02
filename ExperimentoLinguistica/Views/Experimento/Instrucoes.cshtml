@@ -45,51 +45,63 @@
             });
     }
 
+    let frase = 1;
+
     function iniciarTreino() {
-        let textosTreino = [
-            '点心', 
-            '桌子',
-            '书本'
-        ];
+        const diretorio = "Treino";
+        fetch(`/Experimento/ObterTextos?diretorio=${diretorio}`)
+            .then(response => response.json())
+            .then(textosTreino => {
+                let currentIndex = 0;
+                exibirTexto(textosTreino[currentIndex]);
 
-        let currentIndex = 0;
-        exibirTexto(textosTreino[currentIndex]);
+                function exibirTexto(linhaTexto) {
+                    let [texto, simbolo1, simbolo2, exemplo] = linhaTexto;
 
-        function exibirTexto(texto) {
-            setTimeout(() => {
-                document.getElementById('textoTreino').innerText = '+';
-            }, 500);
+                    setTimeout(() => {
+                        document.getElementById('textoTreino').innerText = simbolo1;  
+                    }, 0);
 
-            setTimeout(() => {
-                document.getElementById('textoTreino').innerText = '#######';
-            }, 1000);
+                    setTimeout(() => {
+                        document.getElementById('textoTreino').innerText = simbolo2;
+                    }, 500);
 
-            setTimeout(() => {
-                document.getElementById('textoTreino').innerText = 'Prime Exemplo';
-            }, 1500);
+                    setTimeout(() => {
+                        document.getElementById('textoTreino').innerText = exemplo;
+                    }, 1000);
 
-            setTimeout(() => {
-                document.getElementById('textoTreino').innerText = texto;
+                    setTimeout(() => {
+                        document.getElementById('textoTreino').innerText = texto; 
+                        iniciarGravacao(frase);
+                    }, 1050);
 
-                iniciarGravacao();
+                    setTimeout(() => {
+                        document.getElementById('textoTreino').innerText = "";
+                    }, 4050);
 
-            }, 1550);
+                    setTimeout(() => {
+                        currentIndex++;
+                        frase++;
 
-            setTimeout(() => {
-                currentIndex++;
-                if (currentIndex < textosTreino.length) {
-                    exibirTexto(textosTreino[currentIndex]);
-                } else {
-                    finalizarTreino();
+                        if (currentIndex < textosTreino.length) {
+                            setTimeout(() => {
+                                exibirTexto(textosTreino[currentIndex]);
+                            }, 1000);
+                        } else {
+                            finalizarTreino();
+                        }
+                    }, 4050);
                 }
-            }, 4550);
-        }
+            })
+            .catch(error => {
+                console.error('Erro ao obter os textos: ', error);
+            });
     }
 
     let mediaRecorder;
     let audioChunks = [];
 
-    function iniciarGravacao() {
+    function iniciarGravacao(frase) {
         navigator.mediaDevices.getUserMedia({ audio: true })
             .then(function (stream) {
                 mediaRecorder = new MediaRecorder(stream);
@@ -103,8 +115,8 @@
                 });
 
                 setTimeout(function () {
-                    pararGravacao();
-                }, 3000); 
+                    pararGravacao(frase);
+                }, 3000);
 
             })
             .catch(function (err) {
@@ -112,31 +124,32 @@
             });
     }
 
-    function pararGravacao() {
+    function pararGravacao(frase) {
         mediaRecorder.stop();
         console.log("Gravação finalizada.");
 
         mediaRecorder.addEventListener("stop", function () {
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            audioChunks = []; 
+            audioChunks = [];
 
-            const audioUrl = URL.createObjectURL(audioBlob);
-            const audio = new Audio(audioUrl);
-
-            salvarAudio(audioBlob);
+            salvarAudio(audioBlob, frase);
         });
     }
-    function salvarAudio(audioBlob) {
 
+    function salvarAudio(audioBlob, frase) {
         const formData = new FormData();
         formData.append('audio', audioBlob, 'gravacao.wav');
+        formData.append('frase', frase);
+        formData.append("diretorio", "Treino")
 
-        fetch('/salvar-audio', {
+        fetch('/Experimento/SalvarAudio', {
             method: 'POST',
             body: formData
         }).then(response => {
             if (response.ok) {
-                console.log('Áudio enviado com sucesso.');
+                response.json().then(data => {
+                    console.log('Áudio enviado com sucesso:', data.nomeArquivo);
+                });
             } else {
                 console.log('Erro ao enviar o áudio.');
             }

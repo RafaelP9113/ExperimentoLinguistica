@@ -1,64 +1,150 @@
-﻿<div id="stimulus-area">
-    <p id="fixation">+</p>
-    <p id="mask" style="display:none;">######</p>
-    <p id="prime" style="display:none;"></p>
-    <p id="target" style="display:none;"></p>
+﻿<div id="areaExperimento" style="display:none;">
+    <h3 id="textoExperimento">Preparado? O Experimento começará em breve!</h3>
+
+    <p id="temporizador"></p>
 </div>
 
 <script>
-    var primeDuration = 50;
-    var targetDuration = 3000;
-    var intervalo = 1000;
+    document.getElementById('areaExperimento').style.display = 'block';
+    iniciarExperimento();
 
-    setTimeout(function () {
-        document.getElementById("fixation").style.display = "none";
-        document.getElementById("mask").style.display = "block";
+    window.onload = function () {
+        pedirPermissaoMicrofone();
+    };
 
-        setTimeout(function () {
-            document.getElementById("mask").style.display = "none";
-            document.getElementById("prime").style.display = "block";
-            document.getElementById("prime").innerText = '@Model[0].Prime'; 
-
-            setTimeout(function () {
-                document.getElementById("prime").style.display = "none";
-                document.getElementById("target").style.display = "block";
-                document.getElementById("target").innerText = '@Model[0].Alvo';
-
-                startRecording();
-
-                setTimeout(function () {
-                    document.getElementById("target").style.display = "none";
-                    stopRecording();
-
-                    setTimeout(function () {
-                        window.location.reload();
-                    }, intervalo);
-
-                }, targetDuration);
-            }, primeDuration);
-        }, 500); 
-    }, 500); 
-
-    var mediaRecorder;
-    var chunks = [];
-
-    function startRecording() {
+    function pedirPermissaoMicrofone() {
         navigator.mediaDevices.getUserMedia({ audio: true })
             .then(function (stream) {
-                mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.ondataavailable = function (e) {
-                    chunks.push(e.data);
-                };
-                mediaRecorder.onstop = function () {
-                    var blob = new Blob(chunks, { 'type': 'audio/ogg; codecs=opus' });
-                    var audioURL = window.URL.createObjectURL(blob);
-                    console.log("Audio gravado: ", audioURL);
-                };
-                mediaRecorder.start();
+                console.log("Permissão concedida para usar o microfone.");
+
+            })
+            .catch(function (err) {
+                console.error("Permissão para usar o microfone foi negada: ", err);
+                alert("Para realizar o experimento, é necessário permitir o uso do microfone.");
             });
     }
 
-    function stopRecording() {
+    let frase = 1;
+
+    function iniciarExperimento() {
+        const diretorio = "Experimento";
+        fetch(`/Experimento/ObterTextos?diretorio=${diretorio}`)
+            .then(response => response.json())
+            .then(textosExperimento => {
+                let currentIndex = 0;
+                exibirTexto(textosExperimento[currentIndex]);
+
+                function exibirTexto(linhaTexto) {
+                    let [texto, simbolo1, simbolo2, exemplo] = linhaTexto;
+
+                    setTimeout(() => {
+                        document.getElementById('textoExperimento').innerText = simbolo1;
+                    }, 0);
+
+                    setTimeout(() => {
+                        document.getElementById('textoExperimento').innerText = simbolo2;
+                    }, 500);
+
+                    setTimeout(() => {
+                        document.getElementById('textoExperimento').innerText = exemplo;
+                    }, 1000);
+
+                    setTimeout(() => {
+                        document.getElementById('textoExperimento').innerText = texto;
+                        iniciarGravacao(frase);
+                    }, 1050);
+
+                    setTimeout(() => {
+                        document.getElementById('textoExperimento').innerText = "";
+                    }, 4050);
+
+                    setTimeout(() => {
+                        currentIndex++;
+                        frase++;
+
+                        if (currentIndex < textosExperimento.length) {
+                            setTimeout(() => {
+                                exibirTexto(textosExperimento[currentIndex]);
+                            }, 1000);
+                        } else {
+                            finalizarExperimento();
+                        }
+                    }, 4050);
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao obter os textos: ', error);
+            });
+    }
+
+    let mediaRecorder;
+    let audioChunks = [];
+
+    function iniciarGravacao(frase) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function (stream) {
+                mediaRecorder = new MediaRecorder(stream);
+
+                console.log("Gravando áudio do participante...");
+
+                mediaRecorder.start();
+
+                mediaRecorder.addEventListener("dataavailable", function (event) {
+                    audioChunks.push(event.data);
+                });
+
+                setTimeout(function () {
+                    pararGravacao(frase);
+                }, 3000);
+
+            })
+            .catch(function (err) {
+                console.error("Erro ao acessar o microfone: " + err);
+            });
+    }
+
+    function pararGravacao(frase) {
         mediaRecorder.stop();
+        console.log("Gravação finalizada.");
+
+        mediaRecorder.addEventListener("stop", function () {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            audioChunks = [];
+
+            salvarAudio(audioBlob, frase);
+        });
+    }
+
+    function salvarAudio(audioBlob, frase) {
+
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'gravacao.wav');
+        formData.append('frase', frase);
+        formData.append("diretorio", "Experimento")
+
+        fetch('/Experimento/SalvarAudio', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                response.json().then(data => {
+                    console.log('Áudio enviado com sucesso:', data.nomeArquivo);
+                });
+            } else {
+                console.log('Erro ao enviar o áudio.');
+            }
+        }).catch(error => {
+            console.log('Erro: ', error);
+        });
+    }
+
+    function finalizarExperimento() {
+        document.getElementById('textoExperimento').innerText = 'Experimento finalizado! Agora, aperte espaço para voltar ao inicio.';
+
+        document.addEventListener('keydown', function (event) {
+            if (event.code === 'Space') {
+                window.location.href = '@Url.Action("BoasVindas", "Experimento")';
+            }
+        });
     }
 </script>

@@ -1,0 +1,17 @@
+﻿<div>
+    <h1>Você Finalizou</h1>
+    <p>
+        Agradecemos a sua participação até aqui, mas ainda não acabou! Você agora
+        tem um período para intervalo, se assim quiser.
+        Para a etapa seguinte, solicite o link.
+        Aperte espaço para finalizar esta parte
+    </p>
+</div>
+
+<script>
+    document.addEventListener('keydown', function(event) {
+        if (event.code === 'Space') {
+            window.location.href = '@Url.Action("BoasVindas", "Experimento")';
+        }
+    });
+</script>
