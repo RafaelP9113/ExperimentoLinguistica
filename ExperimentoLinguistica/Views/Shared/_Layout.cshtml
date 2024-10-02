@@ -7,14 +7,6 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ExperimentoLinguistica.styles.css" asp-append-version="true" />
-
-    <script>
-        window.urls = {
-            boasVindas: '@Url.Action("BoasVindas", "Experimento")',
-            experimento: '@Url.Action("Experimento", "Experimento")'
-        };
-    </script>
-
 </head>
 <body>
     <div class="container">
@@ -22,6 +14,15 @@
             @RenderBody()
         </main>
     </div>
+
+    <script>
+        var idiomaSelecionado = '@ViewBag.IdiomaSelecionado';
+
+        window.urls = {
+            boasVindas: '@Url.Action("BoasVindas", "Experimento", new { idioma = ViewBag.IdiomaSelecionado })',
+            experimento: '@Url.Action("Experimento", "Experimento", new { idioma = ViewBag.IdiomaSelecionado })'
+        };
+    </script>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

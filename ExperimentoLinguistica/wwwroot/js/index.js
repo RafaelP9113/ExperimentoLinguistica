@@ -16,7 +16,7 @@
             document.getElementById('instTreino').style.display = 'none';
             document.getElementById('areaTreino').style.display = 'block';
             const diretorio = "Treino";
-            iniciarExperimento(diretorio);
+            iniciarExperimento(diretorio, idiomaSelecionado);
         });
     }
 
@@ -24,7 +24,7 @@
     if (areaExperimento) {
         areaExperimento.style.display = 'block';
         const diretorio = "Experimento";
-        iniciarExperimento(diretorio);
+        iniciarExperimento(diretorio, idiomaSelecionado);
     }
 });
 
@@ -36,12 +36,12 @@ window.onload = function () {
     pedirPermissaoMicrofone();
 };
 
-function iniciarExperimento(diretorio) {
+function iniciarExperimento(diretorio, idiomaSelecionado) {
 
     let frase = 1;
 
     let nomeCampo = 'texto' + diretorio;
-    fetch(`/Experimento/ObterTextos?diretorio=${diretorio}`)
+    fetch(`/Experimento/ObterTextos?diretorio=${diretorio}&idioma=${idiomaSelecionado}`)
         .then(response => response.json())
         .then(textosExperimento => {
             let currentIndex = 0;
@@ -64,7 +64,7 @@ function iniciarExperimento(diretorio) {
 
                 setTimeout(() => {
                     document.getElementById(nomeCampo).innerText = texto;
-                    iniciarGravacao(frase, diretorio);
+                    iniciarGravacao(frase, diretorio, idiomaSelecionado);
                 }, 1050);
 
                 setTimeout(() => {
@@ -80,7 +80,7 @@ function iniciarExperimento(diretorio) {
                             exibirTexto(textosExperimento[currentIndex], nomeCampo);
                         }, 1000);
                     } else {
-                        finalizarExperimento(diretorio);
+                        finalizarExperimento(diretorio, idiomaSelecionado);
                     }
                 }, 4050);
             }
@@ -102,7 +102,7 @@ function pedirPermissaoMicrofone() {
         });
 }
 
-function iniciarGravacao(frase, diretorio) {
+function iniciarGravacao(frase, diretorio, idiomaSelecionado) {
     navigator.mediaDevices.getUserMedia({ audio: true })
         .then(function (stream) {
             mediaRecorder = new MediaRecorder(stream);
@@ -116,7 +116,7 @@ function iniciarGravacao(frase, diretorio) {
             });
 
             setTimeout(function () {
-                pararGravacao(frase, diretorio);
+                pararGravacao(frase, diretorio, idiomaSelecionado);
             }, 3000);
 
         })
@@ -124,7 +124,7 @@ function iniciarGravacao(frase, diretorio) {
             console.error("Erro ao acessar o microfone: " + err);
         });
 }
-function pararGravacao(frase, diretorio) {
+function pararGravacao(frase, diretorio, idiomaSelecionado) {
     mediaRecorder.stop();
     console.log("Gravação finalizada.");
 
@@ -132,16 +132,18 @@ function pararGravacao(frase, diretorio) {
         const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
         audioChunks = [];
 
-        salvarAudio(audioBlob, frase, diretorio);
+        salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado);
     });
 }
 
-function salvarAudio(audioBlob, frase, diretorio) {
+function salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado) {
 
     const formData = new FormData();
     formData.append('audio', audioBlob, 'gravacao.wav');
     formData.append('frase', frase);
-    formData.append("diretorio", diretorio)
+    formData.append("diretorio", diretorio);
+    formData.append("idioma", idiomaSelecionado)
+
 
     fetch('/Experimento/SalvarAudio', {
         method: 'POST',
@@ -159,7 +161,7 @@ function salvarAudio(audioBlob, frase, diretorio) {
     });
 }
 
-function finalizarExperimento(diretorio) {
+function finalizarExperimento(diretorio, idiomaSelecionado) {
     let nomeCampo = 'texto' + diretorio;
 
         if (diretorio === 'Experimento') {

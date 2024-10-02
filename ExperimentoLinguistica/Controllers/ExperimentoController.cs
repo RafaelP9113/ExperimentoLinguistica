@@ -26,7 +26,7 @@ namespace ExperimentoLinguistica.Controllers
         {
             if (model.Aceito)
             {
-                return RedirectToAction("Instrucoes");
+                return RedirectToAction("Instrucoes", "Experimento", new { idioma = model.IdiomaSelecionado });
             }
             else
             {
@@ -34,25 +34,17 @@ namespace ExperimentoLinguistica.Controllers
             }
         }
 
-        public IActionResult Instrucoes()
+        public IActionResult Instrucoes(string idioma)
         {
+            ViewBag.IdiomaSelecionado = idioma;
             return View();
         }
 
-        public IActionResult Experimento()
+        public IActionResult Experimento(string idioma)
         {
-            var estimulos = ObterEstimulos();
-            return View(estimulos);
-        }
+            ViewBag.IdiomaSelecionado = idioma;
 
-        private List<Estimulo> ObterEstimulos()
-        {
-            return new List<Estimulo>
-        {
-            new Estimulo { Prime = "Pincel", Alvo = "苹果", TempoPrime = 50, TempoAlvo = 3000 },
-            new Estimulo { Prime = "Café", Alvo = "家具", TempoPrime = 50, TempoAlvo = 3000 },
-
-        };
+            return View();
         }
 
         public IActionResult Final()
@@ -60,9 +52,8 @@ namespace ExperimentoLinguistica.Controllers
             return View();
         }
 
-
         [HttpGet]
-        public IActionResult ObterTextos(string diretorio)
+        public IActionResult ObterTextos(string diretorio, string idioma)
         {
             string filePath = string.Empty;
 
@@ -89,12 +80,16 @@ namespace ExperimentoLinguistica.Controllers
 
                     if (row != null)
                     {
-                        string texto = row.GetCell(0)?.ToString();  
-                        string simbolo1 = row.GetCell(1)?.ToString();
-                        string simbolo2 = row.GetCell(2)?.ToString();
-                        string exemplo = row.GetCell(3)?.ToString();
+                        if (row.GetCell(4)?.ToString() == idioma)
+                        {
+                            string texto = row.GetCell(0)?.ToString();
+                            string simbolo1 = row.GetCell(1)?.ToString();
+                            string simbolo2 = row.GetCell(2)?.ToString();
+                            string exemplo = row.GetCell(3)?.ToString();
 
-                        textos.Add(new string[] { texto, simbolo1, simbolo2, exemplo });
+                            textos.Add(new string[] { texto, simbolo1, simbolo2, exemplo });
+                        }
+
                     }
                 }
             }
@@ -103,14 +98,14 @@ namespace ExperimentoLinguistica.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SalvarAudio(string diretorio)
+        public async Task<IActionResult> SalvarAudio(string diretorio, string idioma)
         {
             var file = Request.Form.Files[0];
             var frase = int.Parse(Request.Form["frase"]);
 
             if (file != null && file.Length > 0)
             {
-                string fileName = GerarNomeArquivo(frase, diretorio);
+                string fileName = GerarNomeArquivo(frase, diretorio, idioma);
                 string filePath = Path.Combine(_audioDirectory, fileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
@@ -124,7 +119,7 @@ namespace ExperimentoLinguistica.Controllers
             return BadRequest("Falha ao receber o arquivo de áudio.");
         }
 
-        private string GerarNomeArquivo(int frase,string diretorio)
+        private string GerarNomeArquivo(int frase,string diretorio, string idioma)
         {
             if (!Directory.Exists(_audioDirectory))
             {
@@ -132,7 +127,7 @@ namespace ExperimentoLinguistica.Controllers
             }
 
             string sufixo = diretorio == "Treino" ? "T" : "E";
-            var arquivosExistentes = Directory.GetFiles(_audioDirectory, $"P*F{frase}{sufixo}.wav");
+            var arquivosExistentes = Directory.GetFiles(_audioDirectory, $"P*F{frase}{sufixo}{idioma[0]}.wav");
 
             int maiorP = 0;
 
@@ -140,7 +135,7 @@ namespace ExperimentoLinguistica.Controllers
             {
                 var nomeArquivo = Path.GetFileNameWithoutExtension(arquivo);
 
-                var partes = nomeArquivo.Split('P', 'F', sufixo[0]);
+                var partes = nomeArquivo.Split('P', 'F', sufixo[0], idioma[0]);
 
                 if (partes.Length >= 2 && int.TryParse(partes[1], out int numeroP))
                 {
@@ -153,7 +148,7 @@ namespace ExperimentoLinguistica.Controllers
 
             int proximoP = maiorP + 1;
 
-            return $"P{proximoP}F{frase}{sufixo}.wav";
+            return $"P{proximoP}F{frase}{sufixo}{idioma[0]}.wav";
         }
     }
 

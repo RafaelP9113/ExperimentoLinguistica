@@ -9,5 +9,6 @@ namespace ExperimentoLinguistica.Models
     public class Consentimento
     {
         public bool Aceito { get; set; }
+        public string IdiomaSelecionado { get; set; }
     }
 }
