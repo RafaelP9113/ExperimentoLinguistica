@@ -363,3 +363,4 @@ FodyWeavers.xsd
 
 #ignore webconfig
 /FulfillmentGranadoPhebo.Dashboard/web.config
+*.wav
