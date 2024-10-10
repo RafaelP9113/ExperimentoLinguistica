@@ -1,6 +1,5 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
 
-
     const btnAceitarTermo = document.getElementById('aceitarTermo');
     if (btnAceitarTermo) {
         document.getElementById('aceitarTermo').addEventListener('change', function () {
@@ -16,7 +15,7 @@
             document.getElementById('instTreino').style.display = 'none';
             document.getElementById('areaTreino').style.display = 'block';
             const diretorio = "Treino";
-            iniciarExperimento(diretorio, idiomaSelecionado);
+            iniciarExperimento(diretorio, idiomaSelecionado, guid);
         });
     }
 
@@ -24,7 +23,7 @@
     if (areaExperimento) {
         areaExperimento.style.display = 'block';
         const diretorio = "Experimento";
-        iniciarExperimento(diretorio, idiomaSelecionado);
+        iniciarExperimento(diretorio, idiomaSelecionado, guid);
     }
 });
 
@@ -36,7 +35,7 @@ window.onload = function () {
     pedirPermissaoMicrofone();
 };
 
-function iniciarExperimento(diretorio, idiomaSelecionado) {
+function iniciarExperimento(diretorio, idiomaSelecionado, guid) {
 
     let frase = 1;
 
@@ -48,7 +47,7 @@ function iniciarExperimento(diretorio, idiomaSelecionado) {
             exibirTexto(textosExperimento[currentIndex], nomeCampo);
 
             function exibirTexto(linhaTexto, nomeCampo) {
-                let [texto, simbolo1, simbolo2, exemplo] = linhaTexto;
+                let [texto, simbolo1, simbolo2,simbolo3 , exemplo, lista] = linhaTexto;
 
                 setTimeout(() => {
                     document.getElementById(nomeCampo).innerText = simbolo1;
@@ -59,17 +58,21 @@ function iniciarExperimento(diretorio, idiomaSelecionado) {
                 }, 500);
 
                 setTimeout(() => {
+                    document.getElementById(nomeCampo).innerText = simbolo3;
+                }, 535);
+
+                setTimeout(() => {
                     document.getElementById(nomeCampo).innerText = exemplo;
-                }, 1000);
+                }, 1035);
 
                 setTimeout(() => {
                     document.getElementById(nomeCampo).innerText = texto;
-                    iniciarGravacao(frase, diretorio, idiomaSelecionado);
-                }, 1050);
+                    iniciarGravacao(frase, diretorio, idiomaSelecionado, guid, lista);
+                }, 1085);
 
                 setTimeout(() => {
                     document.getElementById(nomeCampo).innerText = "";
-                }, 4050);
+                }, 4085);
 
                 setTimeout(() => {
                     currentIndex++;
@@ -80,9 +83,9 @@ function iniciarExperimento(diretorio, idiomaSelecionado) {
                             exibirTexto(textosExperimento[currentIndex], nomeCampo);
                         }, 1000);
                     } else {
-                        finalizarExperimento(diretorio, idiomaSelecionado);
+                        finalizarExperimento(diretorio, idiomaSelecionado, guid, lista);
                     }
-                }, 4050);
+                }, 4085);
             }
         })
         .catch(error => {
@@ -102,7 +105,7 @@ function pedirPermissaoMicrofone() {
         });
 }
 
-function iniciarGravacao(frase, diretorio, idiomaSelecionado) {
+function iniciarGravacao(frase, diretorio, idiomaSelecionado, guid, lista) {
     navigator.mediaDevices.getUserMedia({ audio: true })
         .then(function (stream) {
             mediaRecorder = new MediaRecorder(stream);
@@ -116,7 +119,7 @@ function iniciarGravacao(frase, diretorio, idiomaSelecionado) {
             });
 
             setTimeout(function () {
-                pararGravacao(frase, diretorio, idiomaSelecionado);
+                pararGravacao(frase, diretorio, idiomaSelecionado, guid, lista);
             }, 3000);
 
         })
@@ -124,7 +127,7 @@ function iniciarGravacao(frase, diretorio, idiomaSelecionado) {
             console.error("Erro ao acessar o microfone: " + err);
         });
 }
-function pararGravacao(frase, diretorio, idiomaSelecionado) {
+function pararGravacao(frase, diretorio, idiomaSelecionado, guid, lista) {
     mediaRecorder.stop();
     console.log("Gravação finalizada.");
 
@@ -132,18 +135,19 @@ function pararGravacao(frase, diretorio, idiomaSelecionado) {
         const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
         audioChunks = [];
 
-        salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado);
+        salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado, guid, lista);
     });
 }
 
-function salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado) {
+function salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado, guid, lista) {
 
     const formData = new FormData();
     formData.append('audio', audioBlob, 'gravacao.wav');
     formData.append('frase', frase);
     formData.append("diretorio", diretorio);
     formData.append("idioma", idiomaSelecionado)
-
+    formData.append("guid", guid)
+    formData.append("lista", lista)
 
     fetch('/Experimento/SalvarAudio', {
         method: 'POST',
@@ -161,20 +165,20 @@ function salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado) {
     });
 }
 
-function finalizarExperimento(diretorio, idiomaSelecionado) {
+function finalizarExperimento(diretorio, idiomaSelecionado, guid, lista) {
     let nomeCampo = 'texto' + diretorio;
 
         if (diretorio === 'Experimento') {
-            document.getElementById(nomeCampo).innerText = 'Experimento finalizado! Agora, aperte espaço para voltar ao inicio.';
+            document.getElementById(nomeCampo).innerText = 'Experimento finalizado! Agora, aperte espaço ou clique na tela para fazermos uma pequena avaliação de similiaridade.';
         }
         else {
-            document.getElementById(nomeCampo).innerText = 'Treino finalizado! Agora, aperte espaço para começar o experimento real.';
+            document.getElementById(nomeCampo).innerText = 'Treino finalizado! Agora, aperte espaço ou clique na tela para começar o experimento real.';
         }
 
     document.addEventListener('keydown', function (event) {
         if (event.code === 'Space') {
             if (diretorio === 'Experimento') {
-                window.location.href = window.urls.boasVindas;
+                window.location.href = window.urls.avaliacao;
             } else {
                 window.location.href = window.urls.experimento;
             }
@@ -183,7 +187,7 @@ function finalizarExperimento(diretorio, idiomaSelecionado) {
 
     document.addEventListener('click', function () {
         if (diretorio === 'Experimento') {
-            window.location.href = window.urls.boasVindas;
+            window.location.href = window.urls.avaliacao;
         } else {
             window.location.href = window.urls.experimento;
         }

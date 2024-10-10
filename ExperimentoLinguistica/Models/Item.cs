@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace ExperimentoLinguistica.Models
 {
-    public class Consentimento
+    public class Item
     {
-        public bool Aceito { get; set; }
-        public string IdiomaSelecionado { get; set; }
-        public string Guid {  get; set; }
+        public string Prime { get; set; }
+        public string Alvo { get; set; }
     }
 }

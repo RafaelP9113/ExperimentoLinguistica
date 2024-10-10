@@ -17,11 +17,20 @@
 
     <script>
         var idiomaSelecionado = '@ViewBag.IdiomaSelecionado';
+        var guid = '@ViewBag.Guid';
+        var lista = '@ViewBag.Lista';
+
+
 
         window.urls = {
             boasVindas: '@Url.Action("BoasVindas", "Experimento", new { idioma = ViewBag.IdiomaSelecionado })',
-            experimento: '@Url.Action("Experimento", "Experimento", new { idioma = ViewBag.IdiomaSelecionado })'
+            experimento: '@Html.Raw(Url.Action("Experimento", "Experimento") + "?idioma=" + ViewBag.IdiomaSelecionado + "&guidView=" + ViewBag.Guid)',
+            avaliacao: '@Html.Raw(Url.Action("Avaliacao", "Experimento") + "?idioma=" + ViewBag.IdiomaSelecionado + "&guidView=" + ViewBag.Guid + "&listaView=" + ViewBag.Lista)'
         };
+
+        console.log(guid);
+        console.log(window.urls.experimento);
+
     </script>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

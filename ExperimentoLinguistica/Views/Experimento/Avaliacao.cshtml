@@ -1,0 +1,69 @@
+﻿@model AvaliacaoViewModel
+
+<form id="avaliacaoForm" method="post" action="/Experimento/SalvarAvaliacao">
+    @for (int i = 0; i < Model.ListaItens.Count; i++)
+    {
+        <div class="menu-avaliacao">
+            <h3>Avalie a similaridade de pronúncia entre o início das palavras:</h3>
+            <p><strong>@Model.ListaItens[i].Prime</strong> <br /> e <br /><strong>@Model.ListaItens[i].Alvo</strong></p>
+
+            <div class="menu-radio">
+                <div class="menu-radio-button">
+                    <input type="radio" id="avaliacao_1_@i" name="avaliacoes[@i]" value="1">
+                    <label for="avaliacao_1_@i">1</label>
+                    <label>Nada semelhante</label>
+                </div>
+                <div class="menu-radio-button">
+                    <input type="radio" id="avaliacao_2_@i" name="avaliacoes[@i]" value="2">
+                    <label for="avaliacao_2_@i">2</label>
+                </div>
+                <div class="menu-radio-button">
+                    <input type="radio" id="avaliacao_3_@i" name="avaliacoes[@i]" value="3">
+                    <label for="avaliacao_3_@i">3</label>
+                </div>
+                <div class="menu-radio-button">
+                    <input type="radio" id="avaliacao_4_@i" name="avaliacoes[@i]" value="4">
+                    <label for="avaliacao_4_@i">4</label>
+                </div>
+                <div class="menu-radio-button">
+                    <input type="radio" id="avaliacao_5_@i" name="avaliacoes[@i]" value="5">
+                    <label for="avaliacao_5_@i">5</label>
+                    <label>Muito semelhante</label>
+                </div>
+            </div>
+
+            <input type="hidden" name="listaItens[@i].Prime" value="@Model.ListaItens[i].Prime" />
+            <input type="hidden" name="listaItens[@i].Alvo" value="@Model.ListaItens[i].Alvo" />
+        </div>
+    }
+
+    <input type="hidden" name="guid" value="@Model.Guid">
+    <input type="hidden" name="idioma" value="@Model.Idioma">
+    <input type="hidden" name="lista" value="@Model.Lista">
+
+    <div class="div-button">
+        <button class="btn-contrast" type="submit">Salvar Avaliação</button>
+    </div>
+
+</form>
+
+
+<script>
+    document.getElementById("avaliacaoForm").addEventListener("submit", function (event) {
+        let isValid = true;
+
+        for (let i = 0; i < @Model.ListaItens.Count; i++) {
+            const avaliacao = document.querySelector(`input[name="avaliacoes[${i}]"]:checked`);
+            if (!avaliacao) {
+                isValid = false;
+                break; 
+            }
+        }
+
+        if (!isValid) {
+            event.preventDefault(); 
+            alert("Por favor, preencha todas as avaliações antes de enviar o formulário.");
+        }
+    });
+</script>
+
