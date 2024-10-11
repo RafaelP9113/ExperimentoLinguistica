@@ -37,8 +37,6 @@ window.onload = function () {
 
 function iniciarExperimento(diretorio, idiomaSelecionado, guid) {
 
-    let frase = 1;
-
     let nomeCampo = 'texto' + diretorio;
     fetch(`/Experimento/ObterTextos?diretorio=${diretorio}&idioma=${idiomaSelecionado}`)
         .then(response => response.json())
@@ -50,7 +48,7 @@ function iniciarExperimento(diretorio, idiomaSelecionado, guid) {
                 let [texto, simbolo1, simbolo2,simbolo3 , exemplo, lista] = linhaTexto;
 
                 setTimeout(() => {
-                    document.getElementById(nomeCampo).innerText = simbolo1;
+                    document.getElementById(nomeCampo).innerText = simbolo1; 
                 }, 0);
 
                 setTimeout(() => {
@@ -58,25 +56,24 @@ function iniciarExperimento(diretorio, idiomaSelecionado, guid) {
                 }, 500);
 
                 setTimeout(() => {
-                    document.getElementById(nomeCampo).innerText = simbolo3;
-                }, 535);
+                    document.getElementById(nomeCampo).innerText = exemplo;
+                }, 1000);
 
                 setTimeout(() => {
-                    document.getElementById(nomeCampo).innerText = exemplo;
-                }, 1035);
+                    document.getElementById(nomeCampo).innerText = simbolo3;
+                }, 1050);
 
                 setTimeout(() => {
                     document.getElementById(nomeCampo).innerText = texto;
-                    iniciarGravacao(frase, diretorio, idiomaSelecionado, guid, lista);
+                    iniciarGravacao(texto, diretorio, idiomaSelecionado, guid, lista);
                 }, 1085);
 
                 setTimeout(() => {
-                    document.getElementById(nomeCampo).innerText = "";
+                    document.getElementById(nomeCampo).innerText = ""; 
                 }, 4085);
 
                 setTimeout(() => {
                     currentIndex++;
-                    frase++;
 
                     if (currentIndex < textosExperimento.length) {
                         setTimeout(() => {
@@ -134,12 +131,47 @@ function pararGravacao(frase, diretorio, idiomaSelecionado, guid, lista) {
     mediaRecorder.addEventListener("stop", function () {
         const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
         audioChunks = [];
+        calcularTempoReacao(audioBlob, function (tempoReacao) {
+            console.log("Tempo de reação: ", tempoReacao, " segundos");
 
-        salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado, guid, lista);
+            salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado, guid, lista, tempoReacao);
+        });
     });
 }
 
-function salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado, guid, lista) {
+function calcularTempoReacao(audioBlob, callback) {
+    const audioContext = new AudioContext();
+
+    const reader = new FileReader();
+    reader.onloadend = function () {
+        const arrayBuffer = reader.result;
+        audioContext.decodeAudioData(arrayBuffer, function (audioBuffer) {
+            const channelData = audioBuffer.getChannelData(0);
+            const sampleRate = audioBuffer.sampleRate;
+
+            let reactionTime = 0;
+            let limiar = 0.2;
+            let foundSound = false;
+
+            for (let i = 0; i < channelData.length; i++) {
+                if (Math.abs(channelData[i]) > limiar) {
+                    reactionTime = i / sampleRate;
+                    foundSound = true;
+                    break;
+                }
+            }
+
+            if (foundSound) {
+                callback(reactionTime);
+            } else {
+                callback(0);
+            }
+        });
+    };
+    reader.readAsArrayBuffer(audioBlob); 
+}
+
+function salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado, guid, lista, tempoReacao) {
 
     const formData = new FormData();
     formData.append('audio', audioBlob, 'gravacao.wav');
@@ -148,6 +180,7 @@ function salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado, guid, lista
     formData.append("idioma", idiomaSelecionado)
     formData.append("guid", guid)
     formData.append("lista", lista)
+    formData.append("tempoReacao", tempoReacao)
 
     fetch('/Experimento/SalvarAudio', {
         method: 'POST',
@@ -162,6 +195,13 @@ function salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado, guid, lista
         }
     }).catch(error => {
         console.log('Erro: ', error);
+    });
+}
+
+function convertToWav(audioBuffer) {
+    return WavEncoder.encode({
+        sampleRate: audioBuffer.sampleRate,
+        channelData: [audioBuffer.getChannelData(0)]
     });
 }
 

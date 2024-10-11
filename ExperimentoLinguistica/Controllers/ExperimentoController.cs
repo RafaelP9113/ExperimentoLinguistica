@@ -1,5 +1,6 @@
 ﻿using ExperimentoLinguistica.Models;
 using Microsoft.AspNetCore.Mvc;
+using NAudio.Wave;
 using NPOI.HSSF.Record.PivotTable;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
@@ -241,14 +242,14 @@ namespace ExperimentoLinguistica.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SalvarAudio(string diretorio, string idioma, string guid, string lista)
+        public async Task<IActionResult> SalvarAudio(string diretorio, string idioma, string guid, string lista, string tempoReacao)
         {
             var file = Request.Form.Files[0];
-            var frase = int.Parse(Request.Form["frase"]);
+            var frase = Request.Form["frase"].ToString();
 
             if (file != null && file.Length > 0)
             {
-                string fileName = GerarNomeArquivo(frase, diretorio, idioma, guid, lista);
+                string fileName = GerarNomeArquivo(frase, diretorio, idioma, guid, lista, tempoReacao);
                 string filePath = Path.Combine(_audioDirectory, fileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
@@ -261,8 +262,7 @@ namespace ExperimentoLinguistica.Controllers
 
             return BadRequest("Falha ao receber o arquivo de áudio.");
         }
-
-        private string GerarNomeArquivo(int frase, string diretorio, string idioma, string guid, string lista)
+        private string GerarNomeArquivo(string frase, string diretorio, string idioma, string guid, string lista, string tempoReacao)
         {
             if (!Directory.Exists(_audioDirectory))
             {
@@ -286,8 +286,40 @@ namespace ExperimentoLinguistica.Controllers
             }
             else
             {
+                SalvarTempoReacao(guid, frase, idioma, lista, tempoReacao);
                 return $"P{guid}F{frase}{sufixo}{idioma[0]}L{lista}.wav";
             }
+        }
+
+        private void SalvarTempoReacao(string guid, string frase, string idioma, string lista, string tempoReacao)
+        {
+            string caminhoArquivo = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "resultado_tempoReacao.xlsx");
+
+            IWorkbook workbook;
+            ISheet sheet;
+
+            using (var file = new FileStream(caminhoArquivo, FileMode.Open, FileAccess.Read))
+            {
+                workbook = new XSSFWorkbook(file);
+            }
+
+            sheet = workbook.GetSheetAt(0);
+
+            int rowCount = sheet.LastRowNum + 1;
+
+            var row = sheet.CreateRow(rowCount++);
+
+            row.CreateCell(0).SetCellValue(guid);
+            row.CreateCell(1).SetCellValue(frase);
+            row.CreateCell(2).SetCellValue(idioma);
+            row.CreateCell(3).SetCellValue(lista);
+            row.CreateCell(4).SetCellValue(tempoReacao);
+
+            using (var file = new FileStream(caminhoArquivo, FileMode.Create, FileAccess.Write))
+            {
+                workbook.Write(file);
+            }
+
         }
 
         [HttpPost]
