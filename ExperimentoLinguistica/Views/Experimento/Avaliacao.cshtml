@@ -26,16 +26,16 @@
                     <label for="avaliacao_4_@i">4</label>
                 </div>
                 <div class="menu-radio-button">
-                    <input type="radio" id="avaliacao_4_@i" name="avaliacoes[@i]" value="4">
-                    <label for="avaliacao_4_@i">5</label>
+                    <input type="radio" id="avaliacao_4_@i" name="avaliacoes[@i]" value="5">
+                    <label for="avaliacao_5_@i">5</label>
                 </div>
                                 <div class="menu-radio-button">
-                    <input type="radio" id="avaliacao_4_@i" name="avaliacoes[@i]" value="4">
-                    <label for="avaliacao_4_@i">6</label>
+                    <input type="radio" id="avaliacao_4_@i" name="avaliacoes[@i]" value="6">
+                    <label for="avaliacao_6_@i">6</label>
                 </div>
                 <div class="menu-radio-button">
-                    <input type="radio" id="avaliacao_5_@i" name="avaliacoes[@i]" value="5">
-                    <label for="avaliacao_5_@i">7</label>
+                    <input type="radio" id="avaliacao_5_@i" name="avaliacoes[@i]" value="7">
+                    <label for="avaliacao_7_@i">7</label>
                     <label>Muito semelhante</label>
                 </div>
             </div>
@@ -54,24 +54,4 @@
     </div>
 
 </form>
-
-
-<script>
-    document.getElementById("avaliacaoForm").addEventListener("submit", function (event) {
-        let isValid = true;
-
-        for (let i = 0; i < @Model.ListaItens.Count; i++) {
-            const avaliacao = document.querySelector(`input[name="avaliacoes[${i}]"]:checked`);
-            if (!avaliacao) {
-                isValid = false;
-                break; 
-            }
-        }
-
-        if (!isValid) {
-            event.preventDefault(); 
-            alert("Por favor, preencha todas as avaliações antes de enviar o formulário.");
-        }
-    });
-</script>
 

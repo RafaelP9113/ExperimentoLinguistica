@@ -219,3 +219,8 @@ audio {
     margin-top: 5%;
     margin-bottom: 5%;
 }
+
+.no-click input[type="radio"] {
+    pointer-events: none; 
+    opacity: 0.5;
+}

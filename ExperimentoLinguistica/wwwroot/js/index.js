@@ -27,6 +27,45 @@
     }
 
     iniciarTestMic();
+
+    const avaliacaoGrupos = document.querySelectorAll('.menu-avaliacao');
+
+    if (avaliacaoGrupos) {
+        avaliacaoGrupos.forEach(grupo => {
+            let alteracoes = 0;
+
+            const radios = grupo.querySelectorAll('input[type="radio"]');
+
+            radios.forEach(radio => {
+                radio.addEventListener('change', function () {
+                    if (alteracoes < 2) {
+                        alteracoes++;
+
+                        if (alteracoes === 2) {
+                            alert('Você só pode alterar a avaliação 2 vezes.');
+                            radios.forEach(r => {
+                                r.parentElement.classList.add('no-click');
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    }
+
+    const form = document.getElementById('avaliacaoForm');
+    if (form) {
+        form.addEventListener('submit', function (event) {
+            const allChecked = Array.from(avaliacaoGrupos).every(grupo => {
+                return Array.from(grupo.querySelectorAll('input[type="radio"]')).some(radio => radio.checked);
+            });
+
+            if (!allChecked) {
+                alert('Por favor, avalie todas as similaridades antes de enviar.');
+                event.preventDefault(); 
+            }
+        });
+    }
 });
 
 
@@ -267,7 +306,7 @@ function iniciarGravacao() {
 
             mediaRecorder.addEventListener("stop", function () {
                 audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                document.getElementById('btnReproduzir').disabled = false; 
+                document.getElementById('btnReproduzir').disabled = false;
             });
 
             setTimeout(function () {
