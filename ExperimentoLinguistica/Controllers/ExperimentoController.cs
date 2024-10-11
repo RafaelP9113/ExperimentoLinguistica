@@ -85,9 +85,9 @@ namespace ExperimentoLinguistica.Controllers
 
                         if (!string.IsNullOrEmpty(guidarq))
                         {
-                            if(guidarq == guid)
+                            if (guidarq == guid)
                             {
-                                exists = true; 
+                                exists = true;
                                 break;
                             }
                         }
@@ -218,7 +218,29 @@ namespace ExperimentoLinguistica.Controllers
                 }
             }
 
-            return Json(textos);
+            var groupedByLength = textos.GroupBy(t => t[0].Length).ToList();
+
+            Random rng = new Random();
+            foreach (var group in groupedByLength)
+            {
+                group.ToList().Shuffle(rng);
+            }
+
+            var result = new List<string[]>();
+            int maxGroupSize = groupedByLength.Max(g => g.Count());
+
+            for (int i = 0; i < maxGroupSize; i++)
+            {
+                foreach (var group in groupedByLength)
+                {
+                    if (i < group.Count())
+                    {
+                        result.Add(group.ElementAt(i));
+                    }
+                }
+            }
+
+            return Json(result);
         }
 
         private static string ObterLista(string idioma)
@@ -401,4 +423,21 @@ namespace ExperimentoLinguistica.Controllers
 
     }
 
+
+    public static class Extensions
+    {
+        private static Random rng = new Random();
+        public static void Shuffle<T>(this IList<T> list, Random rng)
+        {
+            int n = list.Count;
+            while (n > 1)
+            {
+                int k = rng.Next(n--);
+                T temp = list[n];
+                list[n] = list[k];
+                list[k] = temp;
+            }
+        }
+    }
 }
+
