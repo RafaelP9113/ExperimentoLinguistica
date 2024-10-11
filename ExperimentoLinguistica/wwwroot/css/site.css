@@ -63,6 +63,7 @@ h2 {
 
 h3 {
     text-align: center;
+    font-size:24pt;
 }
 
 modal-title {
@@ -165,7 +166,7 @@ input[type="checkbox"] {
 .menu-avaliacao {
     margin-bottom: 25px;
     padding: 20px;
-    height: 40%;
+    height: 45%;
     display: flex;
     align-content: stretch;
     align-items: center;

@@ -139,6 +139,33 @@ function pararGravacao(frase, diretorio, idiomaSelecionado, guid, lista) {
     });
 }
 
+function salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado, guid, lista, tempoReacao) {
+
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'gravacao.wav');
+    formData.append('frase', frase);
+    formData.append("diretorio", diretorio);
+    formData.append("idioma", idiomaSelecionado)
+    formData.append("guid", guid)
+    formData.append("lista", lista)
+    formData.append("tempoReacao", tempoReacao)
+
+    fetch('/Experimento/SalvarAudio', {
+        method: 'POST',
+        body: formData
+    }).then(response => {
+        if (response.ok) {
+            response.json().then(data => {
+                console.log('Áudio enviado com sucesso:', data.nomeArquivo);
+            });
+        } else {
+            console.log('Erro ao enviar o áudio.');
+        }
+    }).catch(error => {
+        console.log('Erro: ', error);
+    });
+}
+
 function calcularTempoReacao(audioBlob, callback) {
     const audioContext = new AudioContext();
 
@@ -168,34 +195,7 @@ function calcularTempoReacao(audioBlob, callback) {
             }
         });
     };
-    reader.readAsArrayBuffer(audioBlob); 
-}
-
-function salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado, guid, lista, tempoReacao) {
-
-    const formData = new FormData();
-    formData.append('audio', audioBlob, 'gravacao.wav');
-    formData.append('frase', frase);
-    formData.append("diretorio", diretorio);
-    formData.append("idioma", idiomaSelecionado)
-    formData.append("guid", guid)
-    formData.append("lista", lista)
-    formData.append("tempoReacao", tempoReacao)
-
-    fetch('/Experimento/SalvarAudio', {
-        method: 'POST',
-        body: formData
-    }).then(response => {
-        if (response.ok) {
-            response.json().then(data => {
-                console.log('Áudio enviado com sucesso:', data.nomeArquivo);
-            });
-        } else {
-            console.log('Erro ao enviar o áudio.');
-        }
-    }).catch(error => {
-        console.log('Erro: ', error);
-    });
+    reader.readAsArrayBuffer(audioBlob);
 }
 
 function convertToWav(audioBuffer) {

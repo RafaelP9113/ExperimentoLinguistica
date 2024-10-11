@@ -17,6 +17,13 @@ namespace ExperimentoLinguistica.Controllers
             return View();
         }
 
+        public IActionResult TestMic(string idioma)
+        {
+            ViewBag.IdiomaSelecionado = idioma;
+
+            return View();
+        }
+
         public IActionResult Consentimento(string idioma)
         {
             ViewBag.IdiomaSelecionado = idioma;
@@ -46,17 +53,50 @@ namespace ExperimentoLinguistica.Controllers
 
         public static string CreateGuidWithTime()
         {
-            byte[] guidBytes = Guid.NewGuid().ToByteArray();
+            string guid = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
 
-            long ticks = DateTime.Now.Ticks;
+            while (CheckIfGuidExists(guid))
+            {
+                guid = Guid.NewGuid().ToString("N").Substring(0, 8);
+            }
 
-            byte[] timeBytes = BitConverter.GetBytes(ticks);
-
-            Array.Copy(timeBytes, 0, guidBytes, 0, 8);
-
-            return new Guid(guidBytes).ToString();
+            return guid;
         }
 
+        public static bool CheckIfGuidExists(string guid)
+        {
+            var exists = false;
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "resultado_tempoReacao.xlsx");
+
+            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                IWorkbook workbook = new XSSFWorkbook(stream);
+                ISheet sheet = workbook.GetSheetAt(0);
+                int rowCount = sheet.LastRowNum;
+
+                for (int rowIndex = 1; rowIndex <= rowCount; rowIndex++)
+                {
+                    IRow row = sheet.GetRow(rowIndex);
+
+                    if (row != null)
+                    {
+                        string guidarq = row.GetCell(0)?.ToString();
+
+                        if (!string.IsNullOrEmpty(guidarq))
+                        {
+                            if(guidarq == guid)
+                            {
+                                exists = true; 
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return exists;
+        }
 
         [HttpPost]
         public IActionResult Consentimento(Consentimento model)
