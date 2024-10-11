@@ -25,6 +25,8 @@
         const diretorio = "Experimento";
         iniciarExperimento(diretorio, idiomaSelecionado, guid);
     }
+
+    iniciarTestMic();
 });
 
 
@@ -34,6 +36,21 @@ let audioChunks = [];
 window.onload = function () {
     pedirPermissaoMicrofone();
 };
+
+function iniciarTestMic() {
+    const btnGravar = document.getElementById('btnGravar');
+    const btnReproduzir = document.getElementById('btnReproduzir');
+
+    if (btnGravar) {
+        btnGravar.addEventListener('click', function () {
+            iniciarGravacao();
+        });
+    }
+
+    if (btnReproduzir) {
+        btnReproduzir.addEventListener('click', reproduzirAudio);
+    }
+}
 
 function iniciarExperimento(diretorio, idiomaSelecionado, guid) {
 
@@ -45,10 +62,10 @@ function iniciarExperimento(diretorio, idiomaSelecionado, guid) {
             exibirTexto(textosExperimento[currentIndex], nomeCampo);
 
             function exibirTexto(linhaTexto, nomeCampo) {
-                let [texto, simbolo1, simbolo2,simbolo3 , exemplo, lista] = linhaTexto;
+                let [texto, simbolo1, simbolo2, simbolo3, exemplo, lista] = linhaTexto;
 
                 setTimeout(() => {
-                    document.getElementById(nomeCampo).innerText = simbolo1; 
+                    document.getElementById(nomeCampo).innerText = simbolo1;
                 }, 0);
 
                 setTimeout(() => {
@@ -69,7 +86,7 @@ function iniciarExperimento(diretorio, idiomaSelecionado, guid) {
                 }, 1085);
 
                 setTimeout(() => {
-                    document.getElementById(nomeCampo).innerText = ""; 
+                    document.getElementById(nomeCampo).innerText = "";
                 }, 4085);
 
                 setTimeout(() => {
@@ -208,12 +225,12 @@ function convertToWav(audioBuffer) {
 function finalizarExperimento(diretorio, idiomaSelecionado, guid, lista) {
     let nomeCampo = 'texto' + diretorio;
 
-        if (diretorio === 'Experimento') {
-            document.getElementById(nomeCampo).innerText = 'Experimento finalizado! Agora, aperte espaço ou clique na tela para fazermos uma pequena avaliação de similiaridade.';
-        }
-        else {
-            document.getElementById(nomeCampo).innerText = 'Treino finalizado! Agora, aperte espaço ou clique na tela para começar o experimento real.';
-        }
+    if (diretorio === 'Experimento') {
+        document.getElementById(nomeCampo).innerText = 'Experimento finalizado! Agora, aperte espaço ou clique na tela para fazermos uma pequena avaliação de similiaridade.';
+    }
+    else {
+        document.getElementById(nomeCampo).innerText = 'Treino finalizado! Agora, aperte espaço ou clique na tela para começar o experimento real.';
+    }
 
     document.addEventListener('keydown', function (event) {
         if (event.code === 'Space') {
@@ -232,4 +249,42 @@ function finalizarExperimento(diretorio, idiomaSelecionado, guid, lista) {
             window.location.href = window.urls.experimento;
         }
     });
+}
+
+
+function iniciarGravacao() {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function (stream) {
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.start();
+            console.log("Gravando áudio...");
+
+            mediaRecorder.addEventListener("dataavailable", function (event) {
+                audioChunks.push(event.data);
+            });
+
+            mediaRecorder.addEventListener("stop", function () {
+                audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                document.getElementById('btnReproduzir').disabled = false; 
+            });
+
+            setTimeout(function () {
+                mediaRecorder.stop();
+                console.log("Gravação finalizada.");
+            }, 5100);
+        })
+        .catch(function (err) {
+            console.error("Erro ao acessar o microfone: " + err);
+        });
+}
+
+function reproduzirAudio() {
+    if (audioBlob) {
+        const audioPlayer = document.getElementById('audioPlayer');
+        audioPlayer.src = URL.createObjectURL(audioBlob);
+        audioPlayer.play();
+        console.log("Reproduzindo áudio...");
+    }
 }

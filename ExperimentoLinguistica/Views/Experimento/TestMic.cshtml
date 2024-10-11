@@ -1,0 +1,22 @@
+﻿<div>
+    <input type="hidden" value="@ViewBag.IdiomaSelecionado" name="IdiomaSelecionado" />
+
+    <h1>Teste de Microfone</h1>
+    <br />
+    <p>Este é um teste sobre seu microfone. Fique a vontade e quando desejar, clique em avançar.</p>
+    <br />
+    <button class="btn-contrast" id="btnGravar">Gravar Áudio</button>
+    <button class="btn-contrast" id="btnReproduzir" disabled>Reproduzir Áudio</button>
+    
+    <audio id="audioPlayer" controls></audio>
+
+    
+    <button class="btn-contrast" id="btnAvancar">Avançar</button>
+
+</div>
+
+<script>
+    document.getElementById('btnAvancar').addEventListener('click', function () {
+        window.location.href = '@Url.Action("Consentimento", "Experimento", new { idioma = ViewBag.IdiomaSelecionado })';
+    });
+</script>

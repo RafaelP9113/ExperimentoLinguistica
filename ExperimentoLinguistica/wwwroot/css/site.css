@@ -213,3 +213,9 @@ input[type="checkbox"] {
     align-content: center;
     justify-content: center;
 }
+
+audio {
+    width: 100%;
+    margin-top: 5%;
+    margin-bottom: 5%;
+}
