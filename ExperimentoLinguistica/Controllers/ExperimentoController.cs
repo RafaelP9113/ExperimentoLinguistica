@@ -128,6 +128,8 @@ namespace ExperimentoLinguistica.Controllers
 
         public IActionResult Final(string idioma, string guid)
         {
+            ViewBag.IdiomaSelecionado = idioma;
+            ViewBag.Guid = guid;
             return View();
         }
 
@@ -418,7 +420,7 @@ namespace ExperimentoLinguistica.Controllers
                 workbook.Write(file);
             }
 
-            return RedirectToAction("Final");
+            return RedirectToAction("Final", new {idioma = idioma, guid = guid});
         }
 
     }

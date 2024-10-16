@@ -1,14 +1,26 @@
-﻿<div>
+﻿@{
+    var guid = ViewBag.Guid;
+}
+
+<div>
     <h1>Você Finalizou</h1>
     <p>
         Agradecemos a sua participação até aqui, mas ainda não acabou! Você agora
         tem um período para intervalo, se assim quiser.
-        Para a etapa seguinte, solicite o link.
-        Aperte espaço ou clique para finalizar esta parte
+        Para a etapa seguinte, clique no botão.
+        Aperte espaço ou clique para finalizar por aqui.
     </p>
+
+    <button id="redirectButton" class="btn-contrast">Ir para próxima etapa</button>
+
 </div>
 
 <script>
+    document.getElementById('redirectButton').addEventListener('click', function () {
+        var url = 'https://lhq-blclab.org/student/experiment_load_login/?questionnaire_ID=blu70vsp&customized_ID=@guid';
+        window.open(url, '_blank');
+    });
+
     document.addEventListener('keydown', function(event) {
         if (event.code === 'Space') {
             window.location.href = '@Url.Action("BoasVindas", "Experimento")';
