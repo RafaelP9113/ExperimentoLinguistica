@@ -1,10 +1,9 @@
 ﻿using ExperimentoLinguistica.Models;
 using Microsoft.AspNetCore.Mvc;
 using NAudio.Wave;
-using NPOI.HSSF.Record.PivotTable;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
-using System.Collections.Generic;
+using Vosk;
 
 namespace ExperimentoLinguistica.Controllers
 {
@@ -177,7 +176,8 @@ namespace ExperimentoLinguistica.Controllers
         {
             string filePath = string.Empty;
 
-            string? lista = ObterLista(idioma);
+            string? lista = string.Empty;
+
 
             if (diretorio == "Treino")
             {
@@ -186,6 +186,7 @@ namespace ExperimentoLinguistica.Controllers
             }
             else
             {
+                lista = ObterLista(idioma);
                 filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "lista.xlsx");
             }
 
@@ -271,7 +272,7 @@ namespace ExperimentoLinguistica.Controllers
                         }
                         else
                         {
-                            while (idiomaCelula != idioma || rowCount == 0)
+                            while (idiomaCelula != idioma || rowCount <= 0)
                             {
                                 rowCount--;
                                 row = sheet.GetRow(rowCount);
@@ -313,6 +314,7 @@ namespace ExperimentoLinguistica.Controllers
 
             if (file != null && file.Length > 0)
             {
+
                 string fileName = GerarNomeArquivo(frase, diretorio, idioma, guid, lista, tempoReacao);
                 string filePath = Path.Combine(_audioDirectory, fileName);
 
@@ -320,6 +322,9 @@ namespace ExperimentoLinguistica.Controllers
                 {
                     await file.CopyToAsync(stream);
                 }
+
+                string recognizedText = RecognizeSpeechFromFile(filePath);
+                double accuracy = CompareText(recognizedText, frase);
 
                 return Ok(new { mensagem = "Áudio salvo com sucesso.", nomeArquivo = fileName });
             }
@@ -420,7 +425,53 @@ namespace ExperimentoLinguistica.Controllers
                 workbook.Write(file);
             }
 
-            return RedirectToAction("Final", new {idioma = idioma, guid = guid});
+            return RedirectToAction("Final", new { idioma = idioma, guid = guid });
+        }
+
+        public static string RecognizeSpeechFromFile(string audioFilePath)
+        {
+            try
+            {
+                Vosk.Vosk.SetLogLevel(0);
+                var modelPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "vosk-model-small-ja-0.22");
+                var model = new Vosk.Model(modelPath);
+
+                using (var waveReader = new WaveFileReader(audioFilePath))
+                {
+                    var sampleRate = waveReader.WaveFormat.SampleRate;
+                    var recognizer = new VoskRecognizer(model, sampleRate);
+
+                    byte[] buffer = new byte[waveReader.WaveFormat.SampleRate / 2];
+                    int bytesRead;
+
+                    while ((bytesRead = waveReader.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        recognizer.AcceptWaveform(buffer, bytesRead);
+                    }
+
+                    return recognizer.FinalResult();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public static double CompareText(string recognizedText, string expectedText)
+        {
+            int length = Math.Min(recognizedText.Length, expectedText.Length);
+            int matches = 0;
+
+            for (int i = 0; i < length; i++)
+            {
+                if (recognizedText[i] == expectedText[i])
+                {
+                    matches++;
+                }
+            }
+
+            return (double)matches / expectedText.Length * 100.0; 
         }
 
     }

@@ -82,7 +82,7 @@ function iniciarTestMic() {
 
     if (btnGravar) {
         btnGravar.addEventListener('click', function () {
-            iniciarGravacao();
+            iniciarGravacaoTeste();
         });
     }
 
@@ -195,6 +195,82 @@ function pararGravacao(frase, diretorio, idiomaSelecionado, guid, lista) {
     });
 }
 
+function audioBufferToWav(buffer) {
+    const numberOfChannels = buffer.numberOfChannels;
+    const sampleRate = buffer.sampleRate;
+    const format = 1; 
+    const bitDepth = 16;
+
+    const resultBufferLength = buffer.length * numberOfChannels * (bitDepth / 8);
+    const headerLength = 44;
+    const totalLength = resultBufferLength + headerLength;
+
+    const wavBuffer = new ArrayBuffer(totalLength);
+    const view = new DataView(wavBuffer);
+
+    writeString(view, 0, 'RIFF');
+    view.setUint32(4, 36 + resultBufferLength, true); 
+    writeString(view, 8, 'WAVE');
+
+    writeString(view, 12, 'fmt ');
+    view.setUint32(16, 16, true); 
+    view.setUint16(20, format, true); 
+    view.setUint16(22, numberOfChannels, true);
+    view.setUint32(24, sampleRate, true); // Sample rate
+    view.setUint32(28, sampleRate * numberOfChannels * (bitDepth / 8), true); // Byte rate
+    view.setUint16(32, numberOfChannels * (bitDepth / 8), true); // Block align
+    view.setUint16(34, bitDepth, true); // Bits per sample
+
+    // data sub-chunk
+    writeString(view, 36, 'data');
+    view.setUint32(40, resultBufferLength, true); // Subchunk2Size
+
+    // Write PCM samples
+    let offset = 44;
+    for (let channel = 0; channel < numberOfChannels; channel++) {
+        const channelData = buffer.getChannelData(channel);
+        for (let i = 0; i < channelData.length; i++) {
+            const sample = Math.max(-1, Math.min(1, channelData[i]));
+            view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+            offset += 2;
+        }
+    }
+
+    return new Blob([view], { type: 'audio/wav' });
+}
+
+function writeString(view, offset, string) {
+    for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+    }
+}
+
+function pararGravacao(frase, diretorio, idiomaSelecionado, guid, lista) {
+    mediaRecorder.stop();
+    console.log("Gravação finalizada.");
+
+    mediaRecorder.addEventListener("stop", function () {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        audioChunks = [];
+
+        const audioContext = new AudioContext();
+        const reader = new FileReader();
+        reader.onloadend = function () {
+            const arrayBuffer = reader.result;
+            audioContext.decodeAudioData(arrayBuffer, function (audioBuffer) {
+                const wavBlob = audioBufferToWav(audioBuffer);
+
+                calcularTempoReacao(wavBlob, function (tempoReacao) {
+                    console.log("Tempo de reação: ", tempoReacao, " segundos");
+
+                    salvarAudio(wavBlob, frase, diretorio, idiomaSelecionado, guid, lista, tempoReacao);
+                });
+            });
+        };
+        reader.readAsArrayBuffer(audioBlob);
+    });
+}
+
 function salvarAudio(audioBlob, frase, diretorio, idiomaSelecionado, guid, lista, tempoReacao) {
 
     const formData = new FormData();
@@ -291,7 +367,7 @@ function finalizarExperimento(diretorio, idiomaSelecionado, guid, lista) {
 }
 
 
-function iniciarGravacao() {
+function iniciarGravacaoTeste() {
     navigator.mediaDevices.getUserMedia({ audio: true })
         .then(function (stream) {
             mediaRecorder = new MediaRecorder(stream);
@@ -306,7 +382,10 @@ function iniciarGravacao() {
 
             mediaRecorder.addEventListener("stop", function () {
                 audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                document.getElementById('btnReproduzir').disabled = false;
+                var btnReproduzir = document.getElementById('btnReproduzir');
+                if (btnReproduzir) {
+                    document.getElementById('btnReproduzir').disabled = false;
+                }
             });
 
             setTimeout(function () {
